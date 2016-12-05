@@ -11,7 +11,7 @@ spring:
   datasource:
     username: wjc
     password: 123456
-    url: jdbc:mysql://localhost:3306/jcombat?useUnicode=true
+    url: jdbc:mysql://localhost:3306/jcombat?useUnicode=true&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     tomcat:
       test-while-idle: true

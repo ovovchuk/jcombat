@@ -7,14 +7,14 @@ DROP TABLE IF EXISTS accounts;
 
 CREATE TABLE accounts
 (
-  id            CHAR(36) PRIMARY KEY                NOT NULL,
-  username      VARCHAR(255)                        NOT NULL,
-  first_name    VARCHAR(255)                        NOT NULL,
-  last_name     VARCHAR(255)                        NOT NULL,
-  password      VARCHAR(255)                        NOT NULL,
-  date_created  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  date_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-  enabled       TINYINT DEFAULT 0                   NOT NULL,
+  id            CHAR(36) PRIMARY KEY                   NOT NULL,
+  username      VARCHAR(255)                           NOT NULL,
+  first_name    VARCHAR(255)                           NOT NULL,
+  last_name     VARCHAR(255)                           NOT NULL,
+  password      VARCHAR(255)                           NOT NULL,
+  date_created  TIMESTAMP DEFAULT CURRENT_TIMESTAMP    NOT NULL,
+  date_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP    NOT NULL,
+  enabled       BIT(1) DEFAULT 0                       NOT NULL,
   UNIQUE INDEX accounts_username_uindex (username)
 )
   DEFAULT CHARSET = utf8;
@@ -47,14 +47,14 @@ CREATE TABLE answers
 
 CREATE TABLE questions
 (
-  id            CHAR(36) PRIMARY KEY      NOT NULL,
-  question      VARCHAR(2000)             NOT NULL,
-  answer_id     CHAR(36)                  NOT NULL,
-  date_created  TIMESTAMP                 NOT NULL,
-  date_modified TIMESTAMP                 NOT NULL,
-  created_by    CHAR(36)                  NOT NULL,
-  modified_by   CHAR(36)                  NOT NULL,
-  is_active     TINYINT(1)                NOT NULL,
+  id            CHAR(36) PRIMARY KEY                              NOT NULL,
+  question      VARCHAR(2000)                                     NOT NULL,
+  answer_id     CHAR(36)                                          NOT NULL,
+  date_created  TIMESTAMP DEFAULT CURRENT_TIMESTAMP               NOT NULL,
+  date_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP               NOT NULL,
+  created_by    CHAR(36)                                          NOT NULL,
+  modified_by   CHAR(36)                                          NOT NULL,
+  is_active     TINYINT(1)                                        NOT NULL,
   INDEX questions_answer_id_index (answer_id),
   INDEX questions_created_by_index (created_by),
   INDEX questions_modified_by_index (modified_by),
