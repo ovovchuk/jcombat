@@ -14,11 +14,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "authorities", schema = "jcombat")
-public class Authority implements Serializable {
+public class Authority {
     @Id
-    @ManyToOne
-    @JoinColumn(name = "username", referencedColumnName = "username")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
-    private Account account;
+    private Integer id;
     private String authority;
 }

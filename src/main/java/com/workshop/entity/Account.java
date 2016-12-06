@@ -1,11 +1,10 @@
 package com.workshop.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Set;
 
@@ -14,8 +13,10 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"authorities"})
+@ToString(exclude = {"authorities"})
 @Table(name = "accounts", schema = "jcombat")
-public class Account {
+public class Account implements Serializable {
     @Id
     @GeneratedValue(generator = "uuid", strategy = GenerationType.IDENTITY)
     @GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -30,6 +31,7 @@ public class Account {
     private Instant dateModified;
     private Boolean enabled;
 
-    @OneToMany(mappedBy = "account")
+    @OneToMany
+    @JoinColumn(name = "username", referencedColumnName = "username")
     private Set<Authority> authorities;
 }

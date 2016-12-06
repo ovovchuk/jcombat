@@ -21,6 +21,7 @@ CREATE TABLE accounts
 
 CREATE TABLE authorities
 (
+  id INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
   username  VARCHAR(255) NOT NULL,
   authority VARCHAR(255) NOT NULL,
   UNIQUE INDEX authorities_username_authority_uindex (username, authority),
