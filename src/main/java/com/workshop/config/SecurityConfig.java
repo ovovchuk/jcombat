@@ -91,20 +91,6 @@ public class SecurityConfig {
             this.tokenStore = tokenStore;
         }
 
-        @Bean
-        public CorsConfigurationSource corsConfigSource() {
-            CorsConfiguration corsConfiguration = new CorsConfiguration();
-            corsConfiguration.setAllowCredentials(true);
-            corsConfiguration.addAllowedOrigin("*");
-            corsConfiguration.addAllowedHeader("*");
-            corsConfiguration.addAllowedMethod("*");
-
-            UrlBasedCorsConfigurationSource configurationSource = new UrlBasedCorsConfigurationSource();
-            configurationSource.registerCorsConfiguration("/**", corsConfiguration);
-
-            return configurationSource;
-        }
-
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
             resources.resourceId("wjc-res").tokenStore(tokenStore);
@@ -115,14 +101,11 @@ public class SecurityConfig {
             http
                     .csrf()
                         .disable()
-                    .cors()
-                        .configurationSource(corsConfigSource())
-                    .and()
-                        .authorizeRequests()
-                        .antMatchers("/oauth/token").permitAll()
-                        .antMatchers("/**").hasRole("USER")
-                        .antMatchers("/**")
-                            .access("#oauth2.hasScope('write') and #oauth2.hasScope('trust') and hasRole('ROLE_USER')");
+                    .authorizeRequests()
+                    .antMatchers("/oauth/token").permitAll()
+                    .antMatchers("/**").hasRole("USER")
+                    .antMatchers("/**")
+                    .access("#oauth2.hasScope('write') and #oauth2.hasScope('trust') and hasRole('ROLE_USER')");
         }
 
         @Configuration
