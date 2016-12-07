@@ -12,8 +12,8 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "session_stats", catalog = "jcombat")
-public class SessionStat {
+@Table(name = "session_items", catalog = "jcombat")
+public class SessionItem {
     @Id
     @GeneratedValue(generator = "uuid", strategy = GenerationType.IDENTITY)
     @GenericGenerator(name = "uuid", strategy = "uuid2")

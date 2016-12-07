@@ -29,10 +29,10 @@ INSERT INTO answers (id, answer_pos, answer, is_correct, question_id, created_by
 VALUES (UUID(), 'D', 'not precisely defined', 0, @qId, @ovId, @ovId);
 
 INSERT INTO sessions (id, name, user_id1, user_id2, date_created, date_end, status)
-VALUES (UUID(), 'ov vs lm', @ovId, @lmId, CURRENT_TIMESTAMP, TIMESTAMPADD(MINUTE, 5, CURRENT_TIMESTAMP()), 'WAITING');
+VALUES (UUID(), 'ov vs lm', @ovId, @lmId, CURRENT_TIMESTAMP, TIMESTAMPADD(MINUTE, 5, CURRENT_TIMESTAMP()), 'CREATED');
 
 SELECT id INTO @sesId FROM sessions WHERE name = 'ov vs lm';
 SELECT id INTO @aId FROM answers WHERE answer = '16 bit';
 
-INSERT INTO session_stats (id, user_health1, user_health2, question_id, answer_id, answered_by, session_id)
+INSERT INTO session_items (id, user_health1, user_health2, question_id, answer_id, answered_by, session_id)
 VALUES (UUID(), 100, 90, @qId, @aId, @ovId, @sesId);

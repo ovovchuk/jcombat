@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS authorities;
-DROP TABLE IF EXISTS session_stats;
+DROP TABLE IF EXISTS session_items;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS answers;
 DROP TABLE IF EXISTS questions;
@@ -81,7 +81,7 @@ CREATE TABLE sessions
 )
   DEFAULT CHARSET = utf8;
 
-CREATE TABLE session_stats
+CREATE TABLE session_items
 (
   id           CHAR(36) PRIMARY KEY                NOT NULL,
   user_health1 TINYINT UNSIGNED                    NOT NULL,

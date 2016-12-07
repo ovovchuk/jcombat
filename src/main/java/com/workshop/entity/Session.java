@@ -39,9 +39,10 @@ public class Session {
 
     @OneToMany
     @JoinColumn(name = "session_id", referencedColumnName = "id")
-    private Set<SessionStat> sessionStats;
+    private Set<SessionItem> items;
+
+    enum SessionStatus {
+        CREATED, STARTED, CLOSED
+    }
 }
 
-enum SessionStatus {
-    STARTED, CLOSED, WAITING
-}

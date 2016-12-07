@@ -1,5 +1,6 @@
 package com.workshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,10 +26,16 @@ public class Answer {
     private Instant dateCreated;
     private Instant dateModified;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @Column(name = "question_id", columnDefinition = "CHAR(36)")
+    private String questionId;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToOne
     @JoinColumn(name = "created_by", referencedColumnName = "id")
     private Account createdBy;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @OneToOne
     @JoinColumn(name = "modified_by", referencedColumnName = "id")
     private Account modifiedBy;

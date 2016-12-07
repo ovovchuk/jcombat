@@ -1,5 +1,6 @@
 package com.workshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -27,8 +28,12 @@ public class Account implements Serializable {
     private String firstName;
     private String lastName;
     private String password;
-    private Instant dateCreated;
-    private Instant dateModified;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant dateCreated = Instant.now();
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant dateModified = Instant.now();
     private Boolean enabled;
 
     @OneToMany
