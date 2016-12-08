@@ -35,6 +35,7 @@ dependencies {
 	compile('org.springframework.security.oauth:spring-security-oauth2')
 	compile('org.springframework.security:spring-security-jwt')
 	compile('org.springframework.boot:spring-boot-starter-web')
+	compile("org.springframework.boot:spring-boot-starter-websocket")
 	compile('org.hibernate:hibernate-java8:5.0.11.Final')
 	runtime('org.springframework.boot:spring-boot-devtools')
 	runtime('mysql:mysql-connector-java')

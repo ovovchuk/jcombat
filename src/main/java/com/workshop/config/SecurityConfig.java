@@ -100,6 +100,7 @@ public class SecurityConfig {
                         .disable()
                     .authorizeRequests()
                     .antMatchers("/oauth/token").permitAll()
+                    .antMatchers("/jcombat/**").permitAll()
                     .antMatchers("/**").hasRole("USER")
                     .antMatchers("/**")
                     .access("#oauth2.hasScope('write') and #oauth2.hasScope('trust') and hasRole('ROLE_USER')");
