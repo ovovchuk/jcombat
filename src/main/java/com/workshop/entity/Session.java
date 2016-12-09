@@ -1,11 +1,13 @@
 package com.workshop.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.Set;
 
@@ -21,6 +23,7 @@ public class Session {
     @Column(columnDefinition = "CHAR(36)")
     private String id;
 
+    @NotNull
     private String name;
 
     @OneToOne
@@ -31,8 +34,11 @@ public class Session {
     @JoinColumn(name = "user_id2", referencedColumnName = "id")
     private Account user2;
 
-    private Instant dateCreated;
-    private Instant dateEnd;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant dateCreated = Instant.now();
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant dateEnd = Instant.now();
 
     @Enumerated(EnumType.STRING)
     private SessionStatus status;
@@ -41,7 +47,7 @@ public class Session {
     @JoinColumn(name = "session_id", referencedColumnName = "id")
     private Set<SessionItem> items;
 
-    enum SessionStatus {
+    public enum SessionStatus {
         CREATED, STARTED, CLOSED
     }
 }

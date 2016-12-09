@@ -69,7 +69,7 @@ CREATE TABLE sessions
 (
   id           CHAR(36) PRIMARY KEY                NOT NULL,
   name         VARCHAR(255)                        NOT NULL,
-  user_id1     CHAR(36),
+  user_id1     CHAR(36)                            NOT NULL,
   user_id2     CHAR(36),
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
   date_end     TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
