@@ -7,19 +7,18 @@ import com.workshop.exception.AccountNotFoundException;
 import com.workshop.repository.AccountRepository;
 import com.workshop.service.SessionService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.Principal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -55,10 +54,14 @@ public class SessionController {
     }
 
     @RequestMapping(value = "/sessions", method = RequestMethod.GET)
-    public Resources<?> getSessions() {
-        List<Session> sessions = sessionService.findAll();
+    public PagedResources<?> getSessions(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                         @RequestParam(value = "size", required = false, defaultValue = "15") int size,
+                                         @RequestParam(value = "sort", required = false, defaultValue = "dateCreated") String[] sort) {
+        PageRequest pageRequest = new PageRequest(page, size, Sort.Direction.ASC, sort);
 
-        return sessionService.createResource(sessions);
+        Page<Session> sessions = sessionService.findAll(pageRequest);
+
+        return sessionService.createPagedResource(sessions, page);
     }
 
     @RequestMapping(value = "/sessions", method = RequestMethod.POST)

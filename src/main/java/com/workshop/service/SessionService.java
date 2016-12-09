@@ -5,7 +5,10 @@ import com.workshop.controller.SessionController;
 import com.workshop.entity.Account;
 import com.workshop.entity.Session;
 import com.workshop.repository.SessionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -40,6 +43,10 @@ public class SessionService {
         return sessionRepository.findAll();
     }
 
+    public Page<Session> findAll(Pageable pageable) {
+        return sessionRepository.findAll(pageable);
+    }
+
     public Resource<Session> createResource(Session session) {
         Resource<Session> resource = new Resource<>(session);
 
@@ -48,18 +55,26 @@ public class SessionService {
         }
 
         if (Objects.nonNull(session.getUser1())) {
-            resource.add(linkTo(AccountController.class).slash("accounts").slash(session.getUser1().getId()).withRel("user1"));
+            resource.add(linkTo(AccountController.class)
+                    .slash("sessions")
+                    .slash(session.getId())
+                    .slash("user1")
+                    .withRel("user1"));
         }
 
         if (Objects.nonNull(session.getUser2())) {
-            resource.add(linkTo(AccountController.class).slash("accounts").slash(session.getUser2().getId()).withRel("user2"));
+            resource.add(linkTo(AccountController.class)
+                    .slash("sessions")
+                    .slash(session.getId())
+                    .slash("user2")
+                    .withRel("user2"));
         }
 
         return resource;
     }
 
-    public Resources createResource(List<Session> sessions) {
-        List<Resource<Session>> resourcesList = sessions.stream()
+    public Resources<Resource<Session>> createResource(List<Session> sessions) {
+        List<Resource<Session>> resources = sessions.stream()
                 .map(this::createResource)
                 .collect(Collectors.toList());
 
@@ -68,6 +83,23 @@ public class SessionService {
                 .slash("sessions")
                 .withSelfRel();
 
-        return new Resources<>(resourcesList, selfRel);
+        return new Resources<>(resources, selfRel);
+    }
+
+    public PagedResources<Resource<Session>> createPagedResource(Page<Session> sessions, int page) {
+        List<Resource<Session>> resources = sessions.getContent().stream()
+                .map(this::createResource)
+                .collect(Collectors.toList());
+
+        Link selfRel = ControllerLinkBuilder
+                .linkTo(SessionController.class)
+                .slash("sessions")
+                .withSelfRel();
+
+        PagedResources.PageMetadata pageMetadata =
+                new PagedResources.PageMetadata(sessions.getSize(), page,
+                        sessions.getTotalElements(), sessions.getTotalPages());
+
+        return new PagedResources<>(resources, pageMetadata);
     }
 }
