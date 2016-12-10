@@ -23,8 +23,12 @@ public class Answer {
     private Character answerPos;
     private String answer;
     private Boolean isCorrect;
-    private Instant dateCreated;
-    private Instant dateModified;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant dateCreated = Instant.now();
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Instant dateModified = Instant.now();
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "question_id", columnDefinition = "CHAR(36)")

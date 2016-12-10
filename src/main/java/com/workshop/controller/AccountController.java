@@ -1,12 +1,15 @@
 package com.workshop.controller;
 
 import com.workshop.entity.Account;
-import com.workshop.exception.AccountNotFoundException;
-import com.workshop.repository.AccountRepository;
+import com.workshop.service.AccountService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.Resource;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -14,29 +17,50 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("/accounts")
 public class AccountController {
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
-    public AccountController(AccountRepository accountRepository) {
-        this.accountRepository = accountRepository;
+    public AccountController(AccountService accountRepository) {
+        this.accountService = accountRepository;
     }
 
     @RequestMapping(value = "/me", method = RequestMethod.GET)
     public Resource<Account> getMe(Principal principal) {
-        Account account = accountRepository.findByUsername(principal.getName())
-                .orElseThrow(() -> {
-                    String msg = String.format("Account with username %s not found", principal.getName());
-                    return new AccountNotFoundException(msg);
-                });
+        Account account = accountService.findByUsername(principal.getName());
 
-        return getAccountResource(account, principal);
+        return accountService.convertToResource(account);
     }
 
-    private Resource<Account> getAccountResource(Account account, Principal principal) {
-        Resource<Account> accountResource = new Resource<>(account);
-        accountResource.add(linkTo(methodOn(AccountController.class).getMe(principal)).withSelfRel());
-        accountResource.add(linkTo(methodOn(AccountController.class).getMe(principal)).withRel("account"));
+    @RequestMapping(method = RequestMethod.GET)
+    public Resources<Resource<Account>> getAccounts(
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "15") int size,
+            @RequestParam(value = "sort", required = false, defaultValue = "username") String[] sort) {
+        PageRequest pageRequest = new PageRequest(page, size, Sort.Direction.ASC, sort);
+        Page<Account> accounts = accountService.findAll(pageRequest);
 
-        return accountResource;
+        Resources<Resource<Account>> resources = accountService.convertToResource(accounts, page);
+        resources.add(linkTo(methodOn(AccountController.class).getAccounts(page, size, sort))
+                .withSelfRel());
+        resources.add(linkTo(methodOn(AccountController.class).getAccounts(page, size, sort))
+                .withRel("accounts"));
+
+        return resources;
+    }
+
+    @PreAuthorize("permitAll")
+    @RequestMapping(method = RequestMethod.POST)
+    public Resource<Account> createAccount(@RequestBody Account account) {
+        Account savedAccount = accountService.save(account);
+
+        return accountService.convertToResource(savedAccount);
+    }
+
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public Resource<Account> getAccountById(@PathVariable String id) {
+        Account account = accountService.findOne(id);
+
+        return accountService.convertToResource(account);
     }
 }

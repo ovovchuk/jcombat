@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Set;
@@ -25,10 +26,16 @@ public class Account implements Serializable {
     @Column(columnDefinition = "CHAR(36)")
     private String id;
 
+    @NotNull
     private String username;
+
+    @NotNull
     private String firstName;
+
+    @NotNull
     private String lastName;
 
+    @NotNull
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 

@@ -3,15 +3,14 @@ package com.workshop.controller;
 import com.workshop.dto.PayloadDTO;
 import com.workshop.entity.Account;
 import com.workshop.entity.Session;
-import com.workshop.exception.AccountNotFoundException;
-import com.workshop.repository.AccountRepository;
+import com.workshop.service.AccountService;
 import com.workshop.service.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -31,15 +30,15 @@ public class SessionController {
     private final static String WS_DESTINATION_FORMAT = "/session/%s";
     private final SimpMessagingTemplate messagingTemplate;
     private final Map<String, String> monitors = new HashMap<>();
-    private final AccountRepository accountRepository;
     private final SessionService sessionService;
+    private final AccountService accountService;
 
     public SessionController(SimpMessagingTemplate messagingTemplate,
-                             AccountRepository accountRepository,
-                             SessionService sessionService) {
+                             SessionService sessionService,
+                             AccountService accountService) {
         this.messagingTemplate = messagingTemplate;
-        this.accountRepository = accountRepository;
         this.sessionService = sessionService;
+        this.accountService = accountService;
     }
 
     @MessageMapping("/combat")
@@ -54,32 +53,68 @@ public class SessionController {
     }
 
     @RequestMapping(value = "/sessions", method = RequestMethod.GET)
-    public PagedResources<?> getSessions(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
-                                         @RequestParam(value = "size", required = false, defaultValue = "15") int size,
-                                         @RequestParam(value = "sort", required = false, defaultValue = "dateCreated") String[] sort) {
+    public Resources<?> getSessions(
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "15") int size,
+            @RequestParam(value = "sort", required = false, defaultValue = "dateCreated") String[] sort) {
         PageRequest pageRequest = new PageRequest(page, size, Sort.Direction.ASC, sort);
 
         Page<Session> sessions = sessionService.findAll(pageRequest);
 
-        return sessionService.createPagedResource(sessions, page);
+        Resources<Resource<Session>> resources = sessionService.convertToResource(sessions, page);
+        resources.add(linkTo(methodOn(SessionController.class).getSessions(page, size, sort)).withSelfRel());
+
+        return resources;
     }
 
     @RequestMapping(value = "/sessions", method = RequestMethod.POST)
     public Resource<Session> saveSession(@Valid @RequestBody Session session, Principal principal) {
-        Session savedSession = sessionService.createSession(session, getAccountFromPrincipal(principal));
+        Account account = accountService.findByUsername(principal.getName());
+        Session savedSession = sessionService.createSession(session, account);
 
-        Resource<Session> resource = sessionService.createResource(savedSession);
+        Resource<Session> resource = sessionService.convertToResource(savedSession);
         resource.add(linkTo(methodOn(SessionController.class).saveSession(session, principal)).withSelfRel());
 
         return resource;
     }
 
-    private Account getAccountFromPrincipal(Principal principal) {
-        return accountRepository.findByUsername(principal.getName()).orElseThrow(() -> {
-            String msg = String.format("Account with username %s not found", principal.getName());
+    @RequestMapping(value = "/sessions/{id}", method = RequestMethod.GET)
+    public Resource<Session> getById(@PathVariable String id) {
+        Session session = sessionService.findOne(id);
 
-            return new AccountNotFoundException(msg);
-        });
+        return sessionService.convertToResource(session);
+    }
+
+    @RequestMapping(value = "/sessions/status/{status:created|started|closed}", method = RequestMethod.GET)
+    public Resources<Resource<Session>> getByStatus(
+            @PathVariable String status,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "15") int size,
+            @RequestParam(value = "sort", required = false, defaultValue = "dateCreated") String[] sort) {
+        Session.SessionStatus sessionStatus = Session.SessionStatus.fromString(status);
+        PageRequest pageRequest = new PageRequest(page, size, Sort.Direction.ASC, sort);
+        Page<Session> sessions = sessionService.findAllByStatus(sessionStatus, pageRequest);
+
+        Resources<Resource<Session>> resources = sessionService.convertToResource(sessions, page);
+        resources.add(linkTo(methodOn(SessionController.class).getByStatus(status, page, size, sort)).withSelfRel());
+
+        return resources;
+    }
+
+    @RequestMapping(value = "/sessions/{id}/{user:user[12]}", method = RequestMethod.GET)
+    public Resource<Account> getSessionUser(@PathVariable String id, @PathVariable String user) {
+        Session session = sessionService.findOne(id);
+
+        if (user.equals("user1")) {
+            return accountService.convertToResource(session.getUser1());
+        } else {
+            return accountService.convertToResource(session.getUser2());
+        }
+    }
+
+    @RequestMapping(value = "/sessions/{id}/join", method = RequestMethod.PUT)
+    public Resource<Session> joinSession(@RequestBody Session session) {
+        return sessionService.convertToResource(sessionService.joinSession(session));
     }
 
     private String getMonitor(String sessionId) {

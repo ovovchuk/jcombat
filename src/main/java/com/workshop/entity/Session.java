@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Set;
 
 @Entity
@@ -48,7 +49,16 @@ public class Session {
     private Set<SessionItem> items;
 
     public enum SessionStatus {
-        CREATED, STARTED, CLOSED
+        CREATED, STARTED, CLOSED;
+
+        public static SessionStatus fromString(String status) {
+            try {
+                return SessionStatus.valueOf(status.toUpperCase(Locale.US));
+            } catch (IllegalArgumentException e) {
+                String msg = "Session status should be one of CREATED, STARTED, CLOSED (case insensitive)";
+                throw new IllegalArgumentException(msg, e);
+            }
+        }
     }
 }
 
