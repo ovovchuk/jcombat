@@ -4,6 +4,7 @@ import com.workshop.dto.PayloadDTO;
 import com.workshop.entity.Account;
 import com.workshop.entity.Session;
 import com.workshop.service.AccountService;
+import com.workshop.service.QuestionService;
 import com.workshop.service.SessionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -32,13 +33,16 @@ public class SessionController {
     private final Map<String, String> monitors = new HashMap<>();
     private final SessionService sessionService;
     private final AccountService accountService;
+    private final QuestionService questionService;
 
     public SessionController(SimpMessagingTemplate messagingTemplate,
                              SessionService sessionService,
-                             AccountService accountService) {
+                             AccountService accountService,
+                             QuestionService questionService) {
         this.messagingTemplate = messagingTemplate;
         this.sessionService = sessionService;
         this.accountService = accountService;
+        this.questionService = questionService;
     }
 
     @MessageMapping("/combat")
@@ -48,6 +52,7 @@ public class SessionController {
 
             Thread.sleep(10000);
             String destination = String.format(WS_DESTINATION_FORMAT, payloadDTO.getSessionId());
+
             this.messagingTemplate.convertAndSend(destination,"Hello session " + payloadDTO.getSessionId());
         }
     }
